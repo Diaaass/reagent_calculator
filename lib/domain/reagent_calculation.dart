@@ -19,10 +19,12 @@ class ReagentInput {
     required this.throughputTonsPerHour,
   });
 
-  /// Все ли входы валидны для расчёта (неотрицательные числа).
+  /// Все ли входы валидны для расчёта. Концентрация — строго > 0,
+  /// так как стоит в знаменателе формулы (деление на ноль недопустимо).
+  /// При нуле/пустом поле UI оставит результат «—».
   bool get isValid =>
       dosageGramsPerTon >= 0 &&
-      concentrationFraction >= 0 &&
+      concentrationFraction > 0 &&
       throughputTonsPerHour >= 0;
 }
 
@@ -40,15 +42,17 @@ class ReagentResult {
 
 /// Основная формула:
 ///
-///   граммовка (г/т) * концентрация (доля) * переработка (т/ч) / 60 (мин) = вылив (мл/мин)
+///   граммовка (г/т) * переработка (т/ч) / концентрация (доля) / 60 (мин) = вылив (мл/мин)
 ///
-/// Концентрация вводится долей: 0.3 = 30%.
+/// Концентрация в знаменателе: при разбавленном реагенте (доля < 1) объём
+/// рабочего раствора больше массы чистого реагента в соответствующее число
+/// раз. Концентрация вводится долей: 0.3 = 30%.
 /// Если позже понадобится вводить процентом (30 = 30%) — заменить
 /// input.concentrationFraction на (input.concentrationFraction / 100).
 ReagentResult calculateFlow(ReagentInput input) {
   final flow = input.dosageGramsPerTon *
-      input.concentrationFraction *
       input.throughputTonsPerHour /
+      input.concentrationFraction /
       60.0;
 
   return ReagentResult(flowMlPerMin: flow);
