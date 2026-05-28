@@ -125,20 +125,35 @@ class CalculatorScreen extends StatelessWidget {
             const SizedBox(height: 28),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: SizedBox(
-                height: 56,
-                child: FilledButton.icon(
-                  onPressed: () => _calculate(context),
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4C6EF5).withValues(alpha: 0.4),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                      spreadRadius: -2,
                     ),
-                    backgroundColor: theme.colorScheme.primary,
-                  ),
-                  icon: const Icon(Icons.calculate_outlined, size: 22),
-                  label: const Text(
-                    'Рассчитать',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                  ],
+                ),
+                child: SizedBox(
+                  height: 56,
+                  child: FilledButton.icon(
+                    onPressed: () => _calculate(context),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      backgroundColor: theme.colorScheme.primary,
+                      elevation: 0,
+                    ),
+                    icon: const Icon(Icons.calculate_outlined, size: 22),
+                    label: const Text(
+                      'Рассчитать',
+                      style:
+                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
               ),

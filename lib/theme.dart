@@ -5,10 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 /// Фон off-white, элементы «плавают» с парой мягких теней,
 /// акцент — насыщенный индиго-синий из дизайна.
 
-const Color _seed = Color(0xFF3D5BF6);
-const Color _softBackground = Color(0xFFEDEFF3);
-const Color _softSurface = Color(0xFFF4F6FA);
-const Color _softInputFill = Color(0xFFE6E9EF);
+const Color _seed = Color(0xFF4C6EF5);
+const Color _softBackground = Color(0xFFF0F2F7);
+const Color _softSurface = Color(0xFFF7F9FC);
+// Левый край pill-инпута (чуть темнее) — задаёт эффект «вдавленности».
+const Color _softInputDark = Color(0xFFD9DEE7);
+// Правый край pill-инпута (светлее), почти как фон.
+const Color _softInputLight = Color(0xFFEEF0F5);
 
 /// Цвета теней для soft-UI контейнеров. Хранятся в ThemeExtension,
 /// чтобы виджеты не хардкодили значения и можно было поддержать
@@ -16,14 +19,16 @@ const Color _softInputFill = Color(0xFFE6E9EF);
 class SoftColors extends ThemeExtension<SoftColors> {
   final Color background;
   final Color surface;
-  final Color inputFill;
+  final Color inputDark;
+  final Color inputLight;
   final Color lightShadow;
   final Color darkShadow;
 
   const SoftColors({
     required this.background,
     required this.surface,
-    required this.inputFill,
+    required this.inputDark,
+    required this.inputLight,
     required this.lightShadow,
     required this.darkShadow,
   });
@@ -31,31 +36,26 @@ class SoftColors extends ThemeExtension<SoftColors> {
   static const light = SoftColors(
     background: _softBackground,
     surface: _softSurface,
-    inputFill: _softInputFill,
+    inputDark: _softInputDark,
+    inputLight: _softInputLight,
     lightShadow: Color(0xFFFFFFFF),
-    darkShadow: Color(0xFFBEC4D0),
-  );
-
-  static const dark = SoftColors(
-    background: Color(0xFF1B1E27),
-    surface: Color(0xFF222632),
-    inputFill: Color(0xFF1B1E27),
-    lightShadow: Color(0xFF2C3142),
-    darkShadow: Color(0xFF11131A),
+    darkShadow: Color(0xFFB5BCCB),
   );
 
   @override
   SoftColors copyWith({
     Color? background,
     Color? surface,
-    Color? inputFill,
+    Color? inputDark,
+    Color? inputLight,
     Color? lightShadow,
     Color? darkShadow,
   }) =>
       SoftColors(
         background: background ?? this.background,
         surface: surface ?? this.surface,
-        inputFill: inputFill ?? this.inputFill,
+        inputDark: inputDark ?? this.inputDark,
+        inputLight: inputLight ?? this.inputLight,
         lightShadow: lightShadow ?? this.lightShadow,
         darkShadow: darkShadow ?? this.darkShadow,
       );
@@ -66,7 +66,8 @@ class SoftColors extends ThemeExtension<SoftColors> {
     return SoftColors(
       background: Color.lerp(background, other.background, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
-      inputFill: Color.lerp(inputFill, other.inputFill, t)!,
+      inputDark: Color.lerp(inputDark, other.inputDark, t)!,
+      inputLight: Color.lerp(inputLight, other.inputLight, t)!,
       lightShadow: Color.lerp(lightShadow, other.lightShadow, t)!,
       darkShadow: Color.lerp(darkShadow, other.darkShadow, t)!,
     );
@@ -75,7 +76,7 @@ class SoftColors extends ThemeExtension<SoftColors> {
 
 ThemeData buildTheme(Brightness brightness) {
   final scheme = ColorScheme.fromSeed(seedColor: _seed, brightness: brightness);
-  final soft = brightness == Brightness.dark ? SoftColors.dark : SoftColors.light;
+  const soft = SoftColors.light;
 
   final base = ThemeData(
     useMaterial3: true,
@@ -86,29 +87,19 @@ ThemeData buildTheme(Brightness brightness) {
   final textTheme = GoogleFonts.interTextTheme(base.textTheme);
 
   return base.copyWith(
-    extensions: [soft],
+    extensions: const [soft],
     textTheme: textTheme,
     scaffoldBackgroundColor: soft.background,
 
-    // Pill-инпуты без видимой рамки. Заливка чуть темнее фона, чтобы
-    // поле «утопало» в подложке (inset neumorphic-эффект).
+    // Фон полей задаём вручную через градиент в InputRow,
+    // поэтому здесь делаем декорацию максимально прозрачной.
     inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: soft.inputFill,
+      filled: false,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(999),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(999),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(999),
-        borderSide: BorderSide(color: scheme.primary, width: 1.5),
-      ),
+      border: const OutlineInputBorder(borderSide: BorderSide.none),
+      enabledBorder: const OutlineInputBorder(borderSide: BorderSide.none),
+      focusedBorder: const OutlineInputBorder(borderSide: BorderSide.none),
       hintStyle: TextStyle(color: scheme.onSurfaceVariant),
     ),
 

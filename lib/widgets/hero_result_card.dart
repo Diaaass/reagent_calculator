@@ -17,24 +17,34 @@ class HeroResultCard extends StatelessWidget {
     final r = result;
     const onColor = Colors.white;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: Container(
-        height: 220,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF4F6BF6), Color(0xFF2E48D8)],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4C6EF5).withValues(alpha: 0.45),
+            blurRadius: 32,
+            offset: const Offset(0, 18),
+            spreadRadius: -4,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF3D5BF6).withValues(alpha: 0.35),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
+          BoxShadow(
+            color: const Color(0xFF4C6EF5).withValues(alpha: 0.22),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Container(
+          height: 220,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF5A78F8), Color(0xFF3A5BE8)],
             ),
-          ],
-        ),
+          ),
         child: Stack(
           children: [
             // Декоративный тайл капель в левом нижнем углу.
@@ -65,10 +75,10 @@ class HeroResultCard extends StatelessWidget {
                   Text(
                     'Расход Реагента',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: onColor.withValues(alpha: 0.85),
+                      color: onColor.withValues(alpha: 0.9),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
@@ -83,7 +93,7 @@ class HeroResultCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     'мл/мин',
                     style: theme.textTheme.titleSmall?.copyWith(
@@ -97,6 +107,7 @@ class HeroResultCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
