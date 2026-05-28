@@ -72,9 +72,11 @@ class HeroResultCard extends StatelessWidget {
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      r == null ? '—' : fmtNum(r.flowMlPerMin),
+                      r == null ? '0' : fmtNum(r.flowMlPerMin),
                       style: theme.textTheme.displayLarge?.copyWith(
-                        color: onColor,
+                        color: r == null
+                            ? onColor.withValues(alpha: 0.4)
+                            : onColor,
                         fontWeight: FontWeight.w800,
                         height: 1.0,
                         fontSize: 64,

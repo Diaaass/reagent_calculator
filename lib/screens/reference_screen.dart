@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 
 import '../domain/models.dart';
 import '../state/app_state.dart';
+import '../widgets/screen_header.dart';
+import '../widgets/soft_container.dart';
 
-/// Справочник реагентов. Tap по реагенту подставляет концентрацию в
-/// калькулятор (через onSelect). Long-press открывает редактор. FAB —
-/// создание нового реагента. Свайп влево — удаление с подтверждением.
+/// Справочник реагентов в стиле soft UI. Tap по реагенту подставляет
+/// концентрацию в калькулятор (через onSelect). Long-press открывает
+/// редактор. «+» в шапке создаёт новый реагент. Свайп влево — удаление.
 class ReferenceScreen extends StatefulWidget {
   final AppState appState;
   final ValueChanged<Reagent> onSelect;
@@ -88,6 +90,7 @@ class _ReferenceScreenState extends State<ReferenceScreen> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       builder: (ctx) => _ReagentEditor(
         initial: initial,
         existingCategories: categories,
@@ -109,63 +112,62 @@ class _ReferenceScreenState extends State<ReferenceScreen> {
       builder: (context, _) {
         final all = widget.appState.reagents;
         final items = _filter(all);
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Справочник'),
-            actions: [
-              IconButton(
-                tooltip: 'Сбросить к стандартным',
-                onPressed: _confirmReset,
-                icon: const Icon(Icons.restart_alt),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            tooltip: 'Добавить реагент',
-            onPressed: () => _openEditor(),
-            child: const Icon(Icons.add),
-          ),
-          body: Column(
+
+        return SafeArea(
+          bottom: false,
+          child: Column(
             children: [
+              ScreenHeader(
+                title: 'Справочник',
+                subtitle: 'Реагенты и концентрации',
+                actions: [
+                  IconButton(
+                    tooltip: 'Сбросить к стандартным',
+                    onPressed: _confirmReset,
+                    icon: Icon(Icons.restart_alt,
+                        color: theme.colorScheme.primary),
+                  ),
+                  IconButton(
+                    tooltip: 'Добавить реагент',
+                    onPressed: () => _openEditor(),
+                    icon: Icon(Icons.add_rounded,
+                        color: theme.colorScheme.primary),
+                  ),
+                ],
+              ),
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: TextField(
                   onChanged: (v) => setState(() => _query = v),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Поиск реагента...',
-                    prefixIcon: Icon(Icons.search),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'РЕАГЕНТЫ И КОНЦЕНТРАЦИИ',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                      letterSpacing: 1.0,
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
               Expanded(
                 child: items.isEmpty
                     ? Center(
-                        child: Text(
-                          all.isEmpty
-                              ? 'Справочник пуст. Нажмите «+», чтобы добавить реагент'
-                              : 'Ничего не найдено',
-                          textAlign: TextAlign.center,
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            all.isEmpty
+                                ? 'Справочник пуст. Нажмите «+», чтобы добавить реагент'
+                                : 'Ничего не найдено',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
                       )
                     : ListView.separated(
-                        // Нижний отступ больше, чтобы FAB не закрывал последнюю карточку.
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 120),
                         itemCount: items.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, i) {
                           final r = items[i];
                           return Dismissible(
@@ -206,28 +208,53 @@ class _ReagentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      margin: EdgeInsets.zero,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        onTap: onTap,
-        onLongPress: onLongPress,
-        title: Text(
-          reagent.name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(reagent.category),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
+    return InkWell(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      borderRadius: BorderRadius.circular(20),
+      child: SoftContainer(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        elevation: 8,
+        child: Row(
           children: [
-            Text(
-              fmtNum(reagent.concentration),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    reagent.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    reagent.category,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-            Text('доля', style: theme.textTheme.bodySmall),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  fmtNum(reagent.concentration),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                Text(
+                  'доля',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -244,7 +271,7 @@ class _SwipeDeleteBackground extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: scheme.errorContainer,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -254,8 +281,6 @@ class _SwipeDeleteBackground extends StatelessWidget {
 }
 
 /// Форма создания/редактирования реагента в нижнем шите.
-/// Поля: Название, Класс (с быстрым выбором из существующих категорий),
-/// Концентрация — доля > 0.
 class _ReagentEditor extends StatefulWidget {
   final Reagent? initial;
   final List<String> existingCategories;
@@ -312,7 +337,6 @@ class _ReagentEditorState extends State<_ReagentEditor> {
     final theme = Theme.of(context);
     final isEdit = widget.initial != null;
     return Padding(
-      // Поднимаем содержимое над клавиатурой.
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
@@ -328,13 +352,15 @@ class _ReagentEditorState extends State<_ReagentEditor> {
               children: [
                 Text(
                   isEdit ? 'Изменить реагент' : 'Новый реагент',
-                  style: theme.textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _nameCtrl,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(labelText: 'Название'),
+                  decoration: const InputDecoration(hintText: 'Название'),
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Введите название'
                       : null,
@@ -343,7 +369,7 @@ class _ReagentEditorState extends State<_ReagentEditor> {
                 TextFormField(
                   controller: _categoryCtrl,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(labelText: 'Класс'),
+                  decoration: const InputDecoration(hintText: 'Класс'),
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Введите класс'
                       : null,
@@ -372,9 +398,8 @@ class _ReagentEditorState extends State<_ReagentEditor> {
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                   ],
                   decoration: const InputDecoration(
-                    labelText: 'Концентрация',
+                    hintText: 'Концентрация (0.3 = 30%)',
                     suffixText: 'доля',
-                    helperText: '0.3 = 30%',
                   ),
                   validator: (v) {
                     final raw = (v ?? '').replaceAll(',', '.');
@@ -390,22 +415,28 @@ class _ReagentEditorState extends State<_ReagentEditor> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          child: Text('Отмена'),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
+                        child: const Text('Отмена'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: FilledButton(
                         onPressed: _submit,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          child: Text(
-                            'Сохранить',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
                           ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          'Сохранить',
+                          style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),

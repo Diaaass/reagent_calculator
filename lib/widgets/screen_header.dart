@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
 
-/// Кастомный заголовок экрана: крупный title, мягкая подпись и иконка
-/// колокольчика справа. Используется вместо стандартного AppBar.
+/// Кастомный заголовок экрана: крупный title, мягкая подпись и
+/// опциональные действия справа (по умолчанию — иконка колокольчика).
 class ScreenHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
-  final VoidCallback? onBellTap;
+
+  /// Если передано — отображается вместо стандартного колокольчика.
+  /// Каждый виджет обычно `IconButton` или их группа.
+  final List<Widget>? actions;
 
   const ScreenHeader({
     super.key,
     required this.title,
     this.subtitle,
-    this.onBellTap,
+    this.actions,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final effectiveActions = actions ??
+        [
+          IconButton(
+            onPressed: null,
+            icon: Icon(
+              Icons.notifications_none_rounded,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ];
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 8, 12, 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -44,13 +58,7 @@ class ScreenHeader extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: onBellTap,
-            icon: Icon(
-              Icons.notifications_none_rounded,
-              color: theme.colorScheme.primary,
-            ),
-          ),
+          ...effectiveActions,
         ],
       ),
     );

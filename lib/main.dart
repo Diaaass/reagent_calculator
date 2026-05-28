@@ -29,8 +29,9 @@ class ReagentApp extends StatelessWidget {
       title: 'Калькулятор реагентов',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(Brightness.light),
-      darkTheme: buildTheme(Brightness.dark),
-      themeMode: ThemeMode.system,
+      // Дизайн сделан только под светлую тему; авто-переключение
+      // на системную dark давало невидимые поля и кашу в навигации.
+      themeMode: ThemeMode.light,
       home: HomeShell(appState: appState),
     );
   }
