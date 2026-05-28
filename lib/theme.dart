@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Единая тема приложения в стиле soft UI / neumorphic.
 /// Фон off-white, элементы «плавают» с парой мягких теней,
@@ -95,12 +94,15 @@ ThemeData buildTheme(Brightness brightness) {
     colorScheme: scheme.copyWith(surface: soft.background),
   );
 
-  // Manrope — самый близкий аналог SF Pro из доступных Google Fonts:
-  // современная геометрия, мягкие изгибы, хорошо смотрится на iOS-стиле.
-  final textTheme = GoogleFonts.manropeTextTheme(base.textTheme).apply(
-    bodyColor: const Color(0xFF1F2330),
-    displayColor: const Color(0xFF1F2330),
-  );
+  // Geist — современный геометричный шрифт от Vercel, ощущается
+  // ближе всего к SF Pro на iOS. TTF вшиты в assets/fonts/,
+  // работает оффлайн (важно для фабричных устройств без интернета).
+  final textTheme = base.textTheme
+      .apply(
+        fontFamily: 'Geist',
+        bodyColor: const Color(0xFF1F2330),
+        displayColor: const Color(0xFF1F2330),
+      );
 
   return base.copyWith(
     extensions: const [soft],
