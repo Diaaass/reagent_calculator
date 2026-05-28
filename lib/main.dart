@@ -7,6 +7,7 @@ import 'state/app_state.dart';
 import 'screens/calculator_screen.dart';
 import 'screens/reference_screen.dart';
 import 'screens/history_screen.dart';
+import 'widgets/floating_nav_bar.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -29,13 +30,13 @@ class ReagentApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),
-      themeMode: ThemeMode.system, // авто светлая/тёмная под систему
+      themeMode: ThemeMode.system,
       home: HomeShell(appState: appState),
     );
   }
 }
 
-/// Корневой каркас: владеет UI-состоянием формы и нижней навигацией.
+/// Корневой каркас: владеет UI-состоянием формы и плавающей навигацией.
 /// AppState приходит сверху и переживает rebuild'ы.
 class HomeShell extends StatefulWidget {
   final AppState appState;
@@ -84,8 +85,6 @@ class _HomeShellState extends State<HomeShell> {
     return double.tryParse(raw.replaceAll(',', '.'));
   }
 
-  /// Любое изменение поля концентрации (программное игнорируем) сбрасывает
-  /// выбранный реагент — пользователь начал вводить вручную.
   void _onConcentrationChanged() {
     if (!_settingConcentrationProgrammatically && _selectedReagent != null) {
       setState(() => _selectedReagent = null);
@@ -109,13 +108,6 @@ class _HomeShellState extends State<HomeShell> {
       throughputTonsPerHour: throughput,
     );
     setState(() => _result = input.isValid ? calculateFlow(input) : null);
-  }
-
-  void _reset() {
-    _dosageCtrl.clear();
-    _concentrationCtrl.clear();
-    _throughputCtrl.clear();
-    setState(() => _selectedReagent = null);
   }
 
   void _save() {
@@ -143,20 +135,6 @@ class _HomeShellState extends State<HomeShell> {
     });
   }
 
-  void _clearSelectedReagent() {
-    setState(() => _selectedReagent = null);
-  }
-
-  /// Подсказка под полем концентрации. Если ввод похож на проценты,
-  /// мягко подсказываем, не блокируя ввод.
-  String _concentrationHelper() {
-    final c = _parse(_concentrationCtrl.text);
-    if (c != null && c > 1) {
-      return 'Похоже на процент. Введите долю: 0.3 = 30%';
-    }
-    return '0.3 = 30%';
-  }
-
   @override
   Widget build(BuildContext context) {
     final screens = [
@@ -165,11 +143,7 @@ class _HomeShellState extends State<HomeShell> {
         concentrationCtrl: _concentrationCtrl,
         throughputCtrl: _throughputCtrl,
         result: _result,
-        onReset: _reset,
         onSave: _result == null ? null : _save,
-        selectedReagent: _selectedReagent,
-        onClearReagent: _clearSelectedReagent,
-        concentrationHelper: _concentrationHelper(),
       ),
       ReferenceScreen(
         appState: widget.appState,
@@ -179,25 +153,15 @@ class _HomeShellState extends State<HomeShell> {
     ];
 
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(index: _index, children: screens),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.calculate_outlined),
-            selectedIcon: Icon(Icons.calculate),
-            label: 'Калькулятор',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            selectedIcon: Icon(Icons.menu_book),
-            label: 'Справочник',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history),
-            label: 'История',
-          ),
+      bottomNavigationBar: FloatingNavBar(
+        currentIndex: _index,
+        onChanged: (i) => setState(() => _index = i),
+        items: const [
+          NavItem(Icons.calculate_outlined),
+          NavItem(Icons.menu_book_outlined),
+          NavItem(Icons.history_rounded),
         ],
       ),
     );
