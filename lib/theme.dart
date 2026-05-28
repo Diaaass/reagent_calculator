@@ -5,17 +5,20 @@ import 'package:google_fonts/google_fonts.dart';
 /// Фон off-white, элементы «плавают» с парой мягких теней,
 /// акцент — насыщенный индиго-синий из дизайна.
 
-const Color _seed = Color(0xFF4C6EF5);
+/// Точный синий из дизайна. Используется как primary везде, где нужен
+/// акцент: кнопка, hero-карточка, активная иконка, рамки аватаров.
+/// Material 3 без override превращает seed в десатурированный тон,
+/// поэтому ColorScheme.fromSeed мы доводим вручную через copyWith.
+const Color appPrimary = Color(0xFF4C6EF5);
+const Color appPrimaryDark = Color(0xFF3A5BE8);
+
 const Color _softBackground = Color(0xFFF0F2F7);
 const Color _softSurface = Color(0xFFF7F9FC);
-// Левый край pill-инпута (чуть темнее) — задаёт эффект «вдавленности».
 const Color _softInputDark = Color(0xFFD9DEE7);
-// Правый край pill-инпута (светлее), почти как фон.
 const Color _softInputLight = Color(0xFFEEF0F5);
 
 /// Цвета теней для soft-UI контейнеров. Хранятся в ThemeExtension,
-/// чтобы виджеты не хардкодили значения и можно было поддержать
-/// тёмную тему отдельным набором.
+/// чтобы виджеты не хардкодили значения.
 class SoftColors extends ThemeExtension<SoftColors> {
   final Color background;
   final Color surface;
@@ -75,7 +78,15 @@ class SoftColors extends ThemeExtension<SoftColors> {
 }
 
 ThemeData buildTheme(Brightness brightness) {
-  final scheme = ColorScheme.fromSeed(seedColor: _seed, brightness: brightness);
+  final scheme = ColorScheme.fromSeed(
+    seedColor: appPrimary,
+    brightness: brightness,
+  ).copyWith(
+    // Override, чтобы primary совпадал с синим из дизайна, а не с
+    // десатурированным тоном из тональной палитры Material 3.
+    primary: appPrimary,
+    onPrimary: Colors.white,
+  );
   const soft = SoftColors.light;
 
   final base = ThemeData(
@@ -84,23 +95,41 @@ ThemeData buildTheme(Brightness brightness) {
     colorScheme: scheme.copyWith(surface: soft.background),
   );
 
-  final textTheme = GoogleFonts.interTextTheme(base.textTheme);
+  // Manrope — самый близкий аналог SF Pro из доступных Google Fonts:
+  // современная геометрия, мягкие изгибы, хорошо смотрится на iOS-стиле.
+  final textTheme = GoogleFonts.manropeTextTheme(base.textTheme).apply(
+    bodyColor: const Color(0xFF1F2330),
+    displayColor: const Color(0xFF1F2330),
+  );
 
   return base.copyWith(
     extensions: const [soft],
-    textTheme: textTheme,
+    textTheme: textTheme.copyWith(
+      headlineSmall: textTheme.headlineSmall?.copyWith(
+        letterSpacing: -0.5,
+        fontWeight: FontWeight.w800,
+      ),
+      titleLarge: textTheme.titleLarge?.copyWith(
+        letterSpacing: -0.3,
+        fontWeight: FontWeight.w700,
+      ),
+      titleMedium: textTheme.titleMedium?.copyWith(
+        letterSpacing: -0.2,
+        fontWeight: FontWeight.w700,
+      ),
+      bodyMedium: textTheme.bodyMedium?.copyWith(letterSpacing: -0.1),
+    ),
     scaffoldBackgroundColor: soft.background,
 
     // Фон полей задаём вручную через градиент в InputRow,
     // поэтому здесь делаем декорацию максимально прозрачной.
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationTheme(
       filled: false,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      border: const OutlineInputBorder(borderSide: BorderSide.none),
-      enabledBorder: const OutlineInputBorder(borderSide: BorderSide.none),
-      focusedBorder: const OutlineInputBorder(borderSide: BorderSide.none),
-      hintStyle: TextStyle(color: scheme.onSurfaceVariant),
+      contentPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      border: OutlineInputBorder(borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
     ),
 
     snackBarTheme: SnackBarThemeData(

@@ -103,7 +103,7 @@ class CalculatorScreen extends StatelessWidget {
                     controller: dosageCtrl,
                     label: 'Граммовка',
                     suffix: 'г/т',
-                    svgAsset: 'assets/icons/drop.svg',
+                    svgAsset: 'assets/icons/folder_minus.svg',
                   ),
                   const SizedBox(height: 14),
                   InputRow(
